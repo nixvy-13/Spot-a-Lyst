@@ -16,8 +16,8 @@
 	},
 	"kv_namespaces": [
 		{
-			"binding": "playlister",
-			"id": "ce753bfeb9864a24b53a0e69965d17f8"
+			"binding": "spotalyst",
+			"id": "2ea5e5025c2340c48737ca355b5b06ee"
 		}
 	],
 	"vars": {

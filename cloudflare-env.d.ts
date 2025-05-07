@@ -3,7 +3,7 @@
 // Runtime types generated with workerd@1.20250428.0 2025-03-01 global_fetch_strictly_public,nodejs_compat
 declare namespace Cloudflare {
 	interface Env {
-		playlister: KVNamespace;
+		spotalyst: KVNamespace;
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_aWRlYWwtY2F0ZmlzaC01NS5jbGVyay5hY2NvdW50cy5kZXYk";
 		ASSETS: Fetcher;
 	}

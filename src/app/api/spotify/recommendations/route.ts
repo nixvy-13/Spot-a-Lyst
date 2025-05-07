@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     // Check KV for cached data
     const { env } = getCloudflareContext();
     const key = `user:${userId}:recommendations`;
-    const cachedData = await env.playlister.get(key);
+    const cachedData = await env.spotalyst.get(key);
     
     if (cachedData) {
       // Return cached data if available
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
     };
     
     // Store in KV
-    await env.playlister.put(key, JSON.stringify(results), { expirationTtl: 86400 }); // Cache for 24 hours
+    await env.spotalyst.put(key, JSON.stringify(results), { expirationTtl: 86400 }); // Cache for 24 hours
       
     return NextResponse.json(results);
   } catch (error) {
