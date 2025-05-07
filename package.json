@@ -1,0 +1,44 @@
+{
+	"name": "tfg",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+		"preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+		"cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+	},
+	"dependencies": {
+		"@auth/core": "^0.34.2",
+		"@clerk/nextjs": "^6.18.5",
+		"@cloudflare/pages-plugin-cloudflare-access": "^1.0.5",
+		"@google/generative-ai": "^0.24.1",
+		"@opennextjs/cloudflare": "~1.0.0-beta.0 || ^1.0.0",
+		"axios": "^1.9.0",
+		"jsonwebtoken": "^9.0.2",
+		"next": "15.3.1",
+		"next-auth": "^5.0.0-beta.27",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"spotify-web-api-node": "^5.0.2",
+		"swr": "^2.3.3"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250502.0",
+		"@eslint/eslintrc": "^3",
+		"@tailwindcss/postcss": "^4",
+		"@types/jsonwebtoken": "^9.0.9",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"@types/spotify-web-api-node": "^5.0.11",
+		"eslint": "^9",
+		"eslint-config-next": "15.3.1",
+		"tailwindcss": "^4",
+		"typescript": "^5",
+		"wrangler": "^4.14.1"
+	}
+}

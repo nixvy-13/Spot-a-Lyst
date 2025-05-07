@@ -1,0 +1,26 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tfg",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2025-03-01",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".open-next/assets"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"kv_namespaces": [
+		{
+			"binding": "playlister",
+			"id": "ce753bfeb9864a24b53a0e69965d17f8"
+		}
+	],
+	"vars": {
+		"NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_aWRlYWwtY2F0ZmlzaC01NS5jbGVyay5hY2NvdW50cy5kZXYk"
+	}
+}
