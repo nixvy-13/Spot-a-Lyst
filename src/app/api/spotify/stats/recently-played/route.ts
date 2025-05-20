@@ -12,22 +12,28 @@ export async function GET(request: NextRequest) {
     
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const forceRefresh = searchParams.get("force") === "true";
     
     // Check KV for cached data
     const { env } = getCloudflareContext();
     const key = `user:${userId}:recently-played:${limit}`;
-    const cachedData = await env.spotalyst.get(key);
     
-    if (cachedData) {
-      // Return cached data if available
-      return NextResponse.json({ tracks: JSON.parse(cachedData) });
+    // Only check cache if not forcing refresh
+    if (!forceRefresh) {
+      const cachedData = await env.playlister.get(key);
+      
+      if (cachedData) {
+        // Return cached data if available
+        return NextResponse.json({ tracks: JSON.parse(cachedData) });
+      }
     }
     
-    // If no cached data, fetch from Spotify API
+    // If no cached data or forcing refresh, fetch from Spotify API
     const token = await getSpotifyToken(userId);
     const recentTracks = await getRecentlyPlayed(token, limit)
     
-    const tracks = recentTracks.map((item: any) => ({
+    // Map the tracks and prepare for grouping
+    const tracksArray = recentTracks.map((item: any) => ({
       id: item.track.id,
       name: item.track.name,
       artist: item.track.artists.map((artist: any) => artist.name).join(", "),
@@ -38,10 +44,33 @@ export async function GET(request: NextRequest) {
       imageUrl: item.track.album.images?.[0]?.url || null,
     }));
     
-    // Store in KV
-    await env.spotalyst.put(key, JSON.stringify(tracks), { expirationTtl: 3600 }); // Cache for 1 hour
+    // Group tracks by ID and count occurrences
+    const groupedTracks = tracksArray.reduce((acc: any[], track) => {
+      const existingTrack = acc.find(t => t.id === track.id);
+      
+      if (existingTrack) {
+        existingTrack.playCount = (existingTrack.playCount || 1) + 1;
+        // Keep the most recent played date
+        if (track.playedAt > existingTrack.playedAt) {
+          existingTrack.playedAt = track.playedAt;
+        }
+      } else {
+        acc.push({
+          ...track,
+          playCount: 1
+        });
+      }
+      
+      return acc;
+    }, []);
     
-    return NextResponse.json({ tracks });
+    // Sort by most recently played
+    groupedTracks.sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime());
+    
+    // Store in KV
+    await env.playlister.put(key, JSON.stringify(groupedTracks), { expirationTtl: 3600 }); // Cache for 1 hour
+    
+    return NextResponse.json({ tracks: groupedTracks });
   } catch (error) {
     console.error("Error fetching recently played tracks:", error);
     return NextResponse.json(

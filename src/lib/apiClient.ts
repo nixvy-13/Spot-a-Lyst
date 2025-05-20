@@ -7,7 +7,9 @@ import {
   RecentlyPlayedResponse,
   PlaylistsResponse,
   RecommendationsResponse,
-  Playlist
+  Playlist,
+  ListeningTimeResponse,
+  ListeningTimeData
 } from '@/types/spotify';
 
 /**
@@ -116,5 +118,36 @@ export const spotifyApi = {
     } else {
       throw new Error('Invalid response format');
     }
+  },
+
+  /**
+   * Get listening time data grouped by days
+   */
+  getListeningTime: async (days: number = 30): Promise<ListeningTimeData[]> => {
+    const response = await fetch(`/api/spotify/stats/listening-time?days=${days}`);
+    const data = await response.json() as ListeningTimeResponse;
+    
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    return data.listeningTime;
+  },
+
+  /**
+   * Refresh all Spotify stats and rebuild KV entries
+   */
+  refreshSpotifyStats: async (): Promise<void> => {
+    const response = await fetch('/api/spotify/stats/refresh', {
+      method: 'POST'
+    });
+    
+    const data = await response.json() as { success?: boolean; error?: string };
+    
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    return;
   }
 }; 

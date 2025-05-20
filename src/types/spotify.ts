@@ -11,6 +11,7 @@ export interface Track {
   spotifyUrl: string;
   previewUrl?: string | null;
   playedAt?: string;
+  playCount?: number;
 }
 
 /**
@@ -43,6 +44,14 @@ export interface Playlist {
 }
 
 /**
+ * Listening time data point
+ */
+export interface ListeningTimeData {
+  date: string;
+  minutes: number;
+}
+
+/**
  * API Response interfaces
  */
 export interface ApiResponse {
@@ -67,4 +76,8 @@ export interface PlaylistsResponse extends ApiResponse {
 
 export interface RecommendationsResponse extends ApiResponse {
   tracks: Track[];
+}
+
+export interface ListeningTimeResponse extends ApiResponse {
+  listeningTime: ListeningTimeData[];
 } 

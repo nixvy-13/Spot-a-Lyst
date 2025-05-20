@@ -6,6 +6,7 @@ import Image from 'next/image';
 import StatsGrid from '@/components/StatsGrid';
 import TrackCard from '@/components/TrackCard';
 import ArtistCard from '@/components/ArtistCard';
+import ListeningTimeChart from '@/components/ListeningTimeChart';
 import { spotifyApi } from '@/lib/apiClient';
 import { Artist, Track, TimeRange } from '@/types/spotify';
 
@@ -22,6 +23,8 @@ export default function ProfilePage() {
   const [topArtists, setTopArtists] = useState<Artist[]>([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>('medium_term');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState({
     tracks: false,
     artists: false,
@@ -74,6 +77,34 @@ export default function ProfilePage() {
     setTimeRange(newRange);
     fetchTopTracks(newRange);
     fetchTopArtists(newRange);
+  };
+  
+  const handleRefreshStats = async () => {
+    if (!isSignedIn || isRefreshing) return;
+    
+    try {
+      setIsRefreshing(true);
+      await spotifyApi.refreshSpotifyStats();
+      
+      // Increment refresh key to trigger ListeningTimeChart refresh
+      setRefreshKey(prev => prev + 1);
+      
+      // Reload all data
+      await Promise.all([
+        fetchTopTracks(timeRange),
+        fetchTopArtists(timeRange),
+        fetchRecentlyPlayed()
+      ]);
+      
+      // Also refresh recommendations in the background
+      fetch('/api/spotify/recommendations?force=true').catch(err => {
+        console.error('Failed to refresh recommendations:', err);
+      });
+    } catch (err) {
+      console.error('Failed to refresh stats:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   useEffect(() => {
@@ -132,9 +163,41 @@ export default function ProfilePage() {
               <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm">
                 Spotify User
               </span>
+              
+              <button
+                onClick={handleRefreshStats}
+                disabled={isRefreshing}
+                className={`flex items-center px-3 py-1 rounded-full text-sm transition-colors ${
+                  isRefreshing
+                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50'
+                }`}
+              >
+                {isRefreshing ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <svg className="mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refresh Stats
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Listening Time Chart Section */}
+      {isSignedIn && (
+        <ListeningTimeChart key={`refresh-${refreshKey}`} />
       )}
 
       {/* Top Tracks Section */}
@@ -194,6 +257,7 @@ export default function ProfilePage() {
             album={track.album}
             imageUrl={track.imageUrl}
             spotifyUrl={track.spotifyUrl}
+            playCount={track.playCount}
           />
         ))}
       </StatsGrid>

@@ -1,7 +1,13 @@
+'use client';
+
+import { SignOutButton, SignInButton, useAuth  } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 
+
 export default function Home() {
+  const { isSignedIn } = useAuth();
+  
   return (
     <div className="flex flex-col items-center justify-center space-y-10 py-10">
       <div className="text-center max-w-3xl mx-auto">
@@ -14,14 +20,21 @@ export default function Home() {
         </p>
         
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-          <Link 
-            href="/profile" 
-            className="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-          >
-            View Your Profile
+        {isSignedIn ? (
+          <Link href="/profile">
+            <div className="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors" >
+              View Your Profile
+            </div>
           </Link>
-        </div>
+        ) : (
+          <SignInButton>
+            <div className="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors" >
+              Login
+            </div>
+          </SignInButton>
+        )}
       </div>
+    </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">

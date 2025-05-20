@@ -13,6 +13,7 @@ interface TrackCardProps {
   spotifyUrl?: string;
   previewUrl?: string | null;
   rank?: number;
+  playCount?: number;
   onSelect?: (id: string) => void;
   isSelected?: boolean;
 }
@@ -27,6 +28,7 @@ export default function TrackCard({
   spotifyUrl,
   previewUrl,
   rank,
+  playCount,
   onSelect,
   isSelected,
 }: TrackCardProps) {
@@ -79,6 +81,11 @@ export default function TrackCard({
         {rank && (
           <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded-full text-sm font-bold">
             #{rank}
+          </div>
+        )}
+        {playCount && playCount > 1 && (
+          <div className="absolute top-2 right-2 bg-green-600 bg-opacity-90 text-white px-2 py-1 rounded-full text-sm font-bold">
+            x{playCount}
           </div>
         )}
         {popularity && (

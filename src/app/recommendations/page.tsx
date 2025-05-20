@@ -45,6 +45,11 @@ interface UserTaste {
   topArtists: string[];
   topTracks: string[];
   genres: string[];
+  stats: {
+    avgPopularity: number;
+    avgEnergy: number;
+    explicitRatio: number;
+  };
 }
 
 interface ApiResponse {
@@ -53,6 +58,8 @@ interface ApiResponse {
   recommendedAlbums: RecommendedAlbum[];
   recommendedTracks: RecommendedTrack[];
   recommendedGenres: string[];
+  roast: string;
+  personalityReading: string;
   userTaste: UserTaste;
   error?: string;
 }
@@ -65,8 +72,11 @@ export default function RecommendationsPage() {
   const [recommendedAlbums, setRecommendedAlbums] = useState<RecommendedAlbum[]>([]);
   const [recommendedTracks, setRecommendedTracks] = useState<RecommendedTrack[]>([]);
   const [recommendedGenres, setRecommendedGenres] = useState<string[]>([]);
+  const [roast, setRoast] = useState<string>("");
+  const [personalityReading, setPersonalityReading] = useState<string>("");
   const [userTaste, setUserTaste] = useState<UserTaste | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'tracks' | 'artists' | 'albums'>('tracks');
 
@@ -80,11 +90,15 @@ export default function RecommendationsPage() {
     if (!user?.id) return;
     
     try {
-      setIsLoading(true);
+      if (regenerate) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
       setError(null);
       
       const url = regenerate 
-        ? '/api/spotify/recommendations?regenerate=true'
+        ? '/api/spotify/recommendations?force=true'
         : '/api/spotify/recommendations';
         
       const response = await fetch(url);
@@ -97,6 +111,8 @@ export default function RecommendationsPage() {
       setRecommendedAlbums(data.recommendedAlbums || []);
       setRecommendedTracks(data.recommendedTracks || []);
       setRecommendedGenres(data.recommendedGenres || []);
+      setRoast(data.roast || "");
+      setPersonalityReading(data.personalityReading || "");
       
       if (data.userTaste) {
         setUserTaste(data.userTaste);
@@ -106,6 +122,7 @@ export default function RecommendationsPage() {
       setError('Failed to fetch recommendations. Please try again.');
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -149,12 +166,29 @@ export default function RecommendationsPage() {
           </div>
           <button
             onClick={refreshRecommendations}
-            className="mt-4 sm:mt-0 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center"
+            disabled={isRefreshing}
+            className={`mt-4 sm:mt-0 px-4 py-2 rounded-md flex items-center transition-colors ${
+              isRefreshing
+                ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                : 'bg-green-500 text-white hover:bg-green-600'
+            }`}
           >
-            <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
-            </svg>
-            Refresh Recommendations
+            {isRefreshing ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                </svg>
+                Refresh Recommendations
+              </>
+            )}
           </button>
         </div>
 
@@ -192,44 +226,91 @@ export default function RecommendationsPage() {
       </div>
 
       {patterns.length > 0 && (
-        <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900 rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center text-purple-800 dark:text-purple-300">
-            <svg className="h-6 w-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 16h2v-2h-2v2zm1.61-9.96c-.36-.74-1.1-1.25-1.96-1.25-1.2 0-2.18.95-2.2 2.14h1.76c0-.39.33-.7.72-.7.4 0 .72.31.72.7 0 .39-.32.7-.72.7-.16 0-.28.11-.28.25V12h1.76v-1.61c.75-.25 1.3-.97 1.3-1.81 0-.54-.23-1.04-.6-1.39-.1-.1-.22-.19-.35-.27-.06-.04-.13-.09-.2-.12-.05-.04-.12-.06-.19-.1z" />
-            </svg>
-            Google Gemini Insights
-          </h2>
-          
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-2 text-purple-700 dark:text-purple-400">Your Music Patterns</h3>
-              <ul className="list-disc pl-5 space-y-1">
-                {patterns.map((pattern, index) => (
-                  <li key={index} className="text-gray-700 dark:text-gray-300">{pattern}</li>
-                ))}
-              </ul>
-            </div>
+        <div className="space-y-6">
+          <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900 rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center text-purple-800 dark:text-purple-300">
+              <svg className="h-6 w-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 16h2v-2h-2v2zm1.61-9.96c-.36-.74-1.1-1.25-1.96-1.25-1.2 0-2.18.95-2.2 2.14h1.76c0-.39.33-.7.72-.7.4 0 .72.31.72.7 0 .39-.32.7-.72.7-.16 0-.28.11-.28.25V12h1.76v-1.61c.75-.25 1.3-.97 1.3-1.81 0-.54-.23-1.04-.6-1.39-.1-.1-.22-.19-.35-.27-.06-.04-.13-.09-.2-.12-.05-.04-.12-.06-.19-.1z" />
+              </svg>
+              Google Gemini Insights
+            </h2>
             
-            {recommendedGenres.length > 0 && (
+            <div className="space-y-6">
               <div>
-                <h3 className="font-semibold text-lg mb-2 text-purple-700 dark:text-purple-400">Genres to Explore</h3>
-                <div className="flex flex-wrap gap-2">
-                  {recommendedGenres.map((genre, index) => (
-                    <span key={index} className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm">
-                      {genre}
-                    </span>
+                <h3 className="font-semibold text-lg mb-2 text-purple-700 dark:text-purple-400">Your Music Patterns</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  {patterns.map((pattern, index) => (
+                    <li key={index} className="text-gray-700 dark:text-gray-300">{pattern}</li>
                   ))}
+                </ul>
+              </div>
+              
+              {recommendedGenres.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-2 text-purple-700 dark:text-purple-400">Genres to Explore</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {recommendedGenres.map((genre, index) => (
+                      <span key={index} className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm">
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Music Stats Card */}
+          {userTaste?.stats && (
+            <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900 rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4 flex items-center text-blue-800 dark:text-blue-300">
+                <svg className="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                </svg>
+                Your Music Stats
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Average Popularity</h3>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{userTaste.stats.avgPopularity}%</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Average Energy</h3>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{userTaste.stats.avgEnergy}%</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Explicit Content</h3>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{userTaste.stats.explicitRatio}%</p>
                 </div>
               </div>
-            )}
-          </div>
-          
-          <div className="mt-4 pt-4 border-t border-purple-200 dark:border-purple-800 text-sm text-gray-500 dark:text-gray-400 flex items-center">
-            <svg className="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-            </svg>
-            Powered by Google Gemini AI
-          </div>
+            </div>
+          )}
+
+          {/* Roast Card */}
+          {roast && (
+            <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900 rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4 flex items-center text-red-800 dark:text-red-300">
+                <svg className="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17h2v-2h-2v2zm2.07-7.75l-.9.92c-.5.51-.86.97-1.04 1.69-.08.32-.13.68-.13 1.14h2v-.5c0-.46.08-.9.22-1.31.2-.58.53-1.1.95-1.52l1.24-1.26c.46-.44.68-1.1.55-1.8-.13-.72-.69-1.33-1.39-1.53-1.11-.31-2.14.32-2.47 1.27-.12.35-.43.58-.82.58-.5 0-.9-.5-.8-1.01.43-1.47 1.68-2.59 3.23-2.83 1.52-.24 2.97.55 3.87 1.8 1.18 1.63.83 3.38-.19 4.4z"/>
+                </svg>
+                AI's Take on Your Taste
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 italic">{roast}</p>
+            </div>
+          )}
+
+          {/* Personality Reading Card */}
+          {personalityReading && (
+            <div className="bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900 rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4 flex items-center text-indigo-800 dark:text-indigo-300">
+                <svg className="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                </svg>
+                Your Musical Horoscope
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300">{personalityReading}</p>
+            </div>
+          )}
         </div>
       )}
 

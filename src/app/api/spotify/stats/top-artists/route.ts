@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get("time_range") || "medium_term";
     const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const forceRefresh = searchParams.get("force") === "true";
 
     const validTimeRange = timeRange === 'short_term' || timeRange === 'medium_term' || timeRange === 'long_term' 
       ? timeRange 
@@ -21,14 +22,18 @@ export async function GET(request: NextRequest) {
     // Check KV for cached data
     const { env } = getCloudflareContext();
     const key = `user:${userId}:top-artists:${validTimeRange}:${limit}`;
-    const cachedData = await env.spotalyst.get(key);
     
-    if (cachedData) {
-      // Return cached data if available
-      return NextResponse.json({ artists: JSON.parse(cachedData) });
+    // Only check cache if not forcing refresh
+    if (!forceRefresh) {
+      const cachedData = await env.playlister.get(key);
+      
+      if (cachedData) {
+        // Return cached data if available
+        return NextResponse.json({ artists: JSON.parse(cachedData) });
+      }
     }
     
-    // If no cached data, fetch from Spotify API
+    // If no cached data or forcing refresh, fetch from Spotify API
     const token = await getSpotifyToken(userId);
     const topArtists = await getTopArtists(token, validTimeRange, limit);
     
@@ -41,7 +46,7 @@ export async function GET(request: NextRequest) {
     }));
     
     // Store in KV
-    await env.spotalyst.put(key, JSON.stringify(artists), { expirationTtl: 3600 }); // Cache for 1 hour
+    await env.playlister.put(key, JSON.stringify(artists), { expirationTtl: 3600 }); // Cache for 1 hour
     
     return NextResponse.json({ artists });
   } catch (error) {
