@@ -158,14 +158,14 @@ export default function ListeningTimeChart({
             />
             <YAxis 
               label={{ 
-                value: 'Minutes', 
+                value: 'Minutos', 
                 angle: -90, 
                 position: 'insideLeft',
                 style: { textAnchor: 'middle' } 
               }}
             />
             <Tooltip 
-              formatter={(value) => [`${value} minutes`, 'Listening Time']}
+              formatter={(value) => [`${value} minutos`, 'Tiempo de escucha']}
               labelFormatter={formatDate}
               contentStyle={{ 
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -176,7 +176,7 @@ export default function ListeningTimeChart({
             <Legend />
             <Bar 
               dataKey="minutes" 
-              name="Listening Time (minutes)"
+              name="Tiempo de escucha (minutos)"
               fill="#1DB954" 
               radius={[4, 4, 0, 0]}
             />

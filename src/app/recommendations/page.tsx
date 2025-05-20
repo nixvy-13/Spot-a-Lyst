@@ -237,7 +237,7 @@ export default function RecommendationsPage() {
             
             <div className="space-y-6">
               <div>
-                <h3 className="font-semibold text-lg mb-2 text-purple-700 dark:text-purple-400">Your Music Patterns</h3>
+                <h3 className="font-semibold text-lg mb-2 text-purple-700 dark:text-purple-400">Tus patrones musicales</h3>
                 <ul className="list-disc pl-5 space-y-1">
                   {patterns.map((pattern, index) => (
                     <li key={index} className="text-gray-700 dark:text-gray-300">{pattern}</li>

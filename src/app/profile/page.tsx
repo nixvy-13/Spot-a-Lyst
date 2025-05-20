@@ -202,7 +202,7 @@ export default function ProfilePage() {
 
       {/* Seccion de canciones top */}
       <StatsGrid
-        title="Your Top Tracks"
+        title="Tu Top de Canciones"
         timeRangeOptions={TIME_RANGE_OPTIONS}
         onTimeRangeChange={handleTimeRangeChange}
         isLoading={isLoading.tracks}
@@ -225,7 +225,7 @@ export default function ProfilePage() {
 
       {/* Seccion de artistas top */}
       <StatsGrid
-        title="Your Top Artists"
+        title="Tu Top de Artistas"
         timeRangeOptions={TIME_RANGE_OPTIONS}
         onTimeRangeChange={handleTimeRangeChange}
         isLoading={isLoading.artists}
@@ -245,7 +245,7 @@ export default function ProfilePage() {
 
       {/* Secion de recien escuchadas */}
       <StatsGrid
-        title="Recently Played"
+        title="Escuchadas Recientemente"
         isLoading={isLoading.recent}
       >
         {recentlyPlayed.slice(0, 10).map((track) => (
