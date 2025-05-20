@@ -65,7 +65,6 @@ export async function GET(request: NextRequest) {
         valence: track.valence
       }))
     };
-    console.log(userTasteInfo);
     let aiInsights;
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
@@ -96,12 +95,11 @@ export async function GET(request: NextRequest) {
       }
       
       IMPORTANT: Return ONLY the JSON with no explanations, no backticks, and no markdown formatting.
-      Just the raw JSON data.
+      Just the raw JSON data, answer in spanish.
     `;
     
     const geminiResult = await model.generateContent(prompt);
     const geminiResponse = await geminiResult.response.text();
-    console.log(geminiResponse);
     try {
       const cleanedResponse = extractJsonFromMarkdown(geminiResponse);        
       aiInsights = JSON.parse(cleanedResponse);
@@ -112,7 +110,6 @@ export async function GET(request: NextRequest) {
       aiInsights.recommendedGenres = aiInsights.recommendedGenres || [];
     } catch (error) {
       console.error("Failed to parse Gemini response:", error);
-      console.log("Raw response:", geminiResponse);
       aiInsights = {
         patterns: ["Based on your listening history"],
         recommendedTracks: [],
