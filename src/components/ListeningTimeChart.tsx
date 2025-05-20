@@ -48,7 +48,7 @@ export default function ListeningTimeChart({
       setError(null);
       const data = await spotifyApi.getListeningTime(timeRange);
       
-      // Make sure we have data for all days
+      // Asegurarse de que los datos estén ordenados por fecha
       const filledData = fillMissingDates(data, timeRange);
       setListeningData(filledData);
     } catch (err: any) {
@@ -62,12 +62,12 @@ export default function ListeningTimeChart({
   const fillMissingDates = (data: ListeningTimeData[], daysCount: number): ListeningTimeData[] => {
     const filledData: Record<string, ListeningTimeData> = {};
     
-    // Create a map of existing data
+    // Crear un mapa de los datos existentes
     data.forEach(item => {
       filledData[item.date] = item;
     });
     
-    // Fill missing dates with zero values
+    // Llenar los dias faltantes con valor 0
     const today = new Date();
     for (let i = 0; i < daysCount; i++) {
       const date = new Date(today);
@@ -82,7 +82,7 @@ export default function ListeningTimeChart({
       }
     }
     
-    // Convert back to array and sort by date
+    // Convertir de vuelta a array y filtrar por fechas
     return Object.values(filledData)
       .sort((a, b) => a.date.localeCompare(b.date));
   };
@@ -116,7 +116,7 @@ export default function ListeningTimeChart({
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">
-          Listening Time
+          Tiempo de escucha
         </h2>
         
         <div className="flex space-x-2">
@@ -130,7 +130,7 @@ export default function ListeningTimeChart({
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              {days === 7 ? 'Week' : days === 14 ? '2 Weeks' : days === 30 ? 'Month' : '3 Months'}
+              {days === 7 ? 'Semana' : days === 14 ? '2 Semanas' : days === 30 ? 'Mes' : '3 Meses'}
             </button>
           ))}
         </div>
@@ -183,7 +183,7 @@ export default function ListeningTimeChart({
           </BarChart>
         </ResponsiveContainer>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-8 text-center">
-          Esta grafica se va enriqueciendo cada vez que visitas la página.
+          Esta gráfica se va enriqueciendo cada vez que visitas la página.
         </p>
       </div>
     </div>

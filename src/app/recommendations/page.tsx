@@ -147,7 +147,7 @@ export default function RecommendationsPage() {
           </svg>
           <h2 className="text-2xl font-bold mb-4">Login Required</h2>
           <p className="mb-6 text-gray-600 dark:text-gray-300">
-            Please login with your Spotify account to get personalized music recommendations.
+            Por favor inicia sesion con tu cuenta de Spotify para ver recomendaciones de musica personalizadas.
           </p>
         </div>
       </div>
@@ -159,9 +159,9 @@ export default function RecommendationsPage() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">AI-Powered Recommendations</h1>
+            <h1 className="text-3xl font-bold mb-2">Recomendaciones de la IA</h1>
             <p className="text-gray-600 dark:text-gray-300">
-              Discover new music based on your listening habits. Our AI analyzes your top tracks and artists to suggest music you might love.
+              Descubre nueva musica basada en tus hábitos de escucha. La IA analizara tus canciones y artistas mas escuchados para recomendarte música afín a tus gustos.
             </p>
           </div>
           <button
@@ -179,14 +179,14 @@ export default function RecommendationsPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Refreshing...
+                Recargando...
               </>
             ) : (
               <>
                 <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
                 </svg>
-                Refresh Recommendations
+                Recargar Recomendaciones
               </>
             )}
           </button>
@@ -204,10 +204,10 @@ export default function RecommendationsPage() {
               <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
               </svg>
-              Based on your music taste
+              Basado en tus gustos
             </h3>
             <p className="text-sm">
-              These recommendations are generated based on your listening history.
+              Estas recomendaciones estan generadas basandose en tu historial de escuchas.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {userTaste.topArtists.slice(0, 3).map((artist, index) => (
@@ -260,53 +260,53 @@ export default function RecommendationsPage() {
             </div>
           </div>
 
-          {/* Music Stats Card */}
+          {/* Carta stats de musica */}
           {userTaste?.stats && (
             <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900 rounded-lg shadow p-6">
               <h2 className="text-xl font-bold mb-4 flex items-center text-blue-800 dark:text-blue-300">
                 <svg className="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
                 </svg>
-                Your Music Stats
+                Tus estadísticas musicales
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Average Popularity</h3>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Media de popularidad</h3>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{userTaste.stats.avgPopularity}%</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Average Energy</h3>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Media de energia</h3>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{userTaste.stats.avgEnergy}%</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Explicit Content</h3>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Contenido explícito</h3>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{userTaste.stats.explicitRatio}%</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Roast Card */}
+          {/* Carta de roast */}
           {roast && (
             <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900 rounded-lg shadow p-6">
               <h2 className="text-xl font-bold mb-4 flex items-center text-red-800 dark:text-red-300">
                 <svg className="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17h2v-2h-2v2zm2.07-7.75l-.9.92c-.5.51-.86.97-1.04 1.69-.08.32-.13.68-.13 1.14h2v-.5c0-.46.08-.9.22-1.31.2-.58.53-1.1.95-1.52l1.24-1.26c.46-.44.68-1.1.55-1.8-.13-.72-.69-1.33-1.39-1.53-1.11-.31-2.14.32-2.47 1.27-.12.35-.43.58-.82.58-.5 0-.9-.5-.8-1.01.43-1.47 1.68-2.59 3.23-2.83 1.52-.24 2.97.55 3.87 1.8 1.18 1.63.83 3.38-.19 4.4z"/>
                 </svg>
-                AI's Take on Your Taste
+                Lo que la IA dice de ti
               </h2>
               <p className="text-gray-700 dark:text-gray-300 italic">{roast}</p>
             </div>
           )}
 
-          {/* Personality Reading Card */}
+          {/* Carta de lectura de personalidad */}
           {personalityReading && (
             <div className="bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900 rounded-lg shadow p-6">
               <h2 className="text-xl font-bold mb-4 flex items-center text-indigo-800 dark:text-indigo-300">
                 <svg className="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
                 </svg>
-                Your Musical Horoscope
+                Tu horóscopo musical
               </h2>
               <p className="text-gray-700 dark:text-gray-300">{personalityReading}</p>
             </div>
@@ -315,7 +315,7 @@ export default function RecommendationsPage() {
       )}
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        {/* Tabs Navigation */}
+        {/* Navegacion */}
         <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
             className={`flex-1 py-4 px-6 text-center font-medium ${
@@ -325,7 +325,7 @@ export default function RecommendationsPage() {
             }`}
             onClick={() => setActiveTab('tracks')}
           >
-            Songs
+            Canciones
           </button>
           <button
             className={`flex-1 py-4 px-6 text-center font-medium ${
@@ -335,7 +335,7 @@ export default function RecommendationsPage() {
             }`}
             onClick={() => setActiveTab('artists')}
           >
-            Artists
+            Artistas
           </button>
           <button
             className={`flex-1 py-4 px-6 text-center font-medium ${
@@ -349,12 +349,12 @@ export default function RecommendationsPage() {
           </button>
         </div>
 
-        {/* Tab Content */}
+        {/* Contenido */}
         <div className="p-6">
-          {/* Tracks Tab */}
+          {/* Canciones */}
           {activeTab === 'tracks' && (
             <div>
-              <h2 className="text-xl font-bold mb-6">Recommended Songs</h2>
+              <h2 className="text-xl font-bold mb-6">Canciones Recomendadas</h2>
               {recommendedTracks.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {recommendedTracks.map((track, index) => (
@@ -389,22 +389,22 @@ export default function RecommendationsPage() {
                           <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
                           </svg>
-                          Listen on Spotify
+                          Escúchalo en Spotify
                         </a>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 dark:text-gray-400">No song recommendations available</p>
+                <p className="text-center text-gray-500 dark:text-gray-400">No hay recomendaciones de canciones disponibles</p>
               )}
             </div>
           )}
 
-          {/* Artists Tab */}
+          {/* Artistas */}
           {activeTab === 'artists' && (
             <div>
-              <h2 className="text-xl font-bold mb-6">Recommended Artists</h2>
+              <h2 className="text-xl font-bold mb-6">Artistas Recomendados</h2>
               {recommendedArtists.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {recommendedArtists.map((artist, index) => (
@@ -441,7 +441,7 @@ export default function RecommendationsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 dark:text-gray-400">No artist recommendations available</p>
+                <p className="text-center text-gray-500 dark:text-gray-400">No hay recomendaciones de artistas disponibles</p>
               )}
             </div>
           )}
@@ -449,7 +449,7 @@ export default function RecommendationsPage() {
           {/* Albums Tab */}
           {activeTab === 'albums' && (
             <div>
-              <h2 className="text-xl font-bold mb-6">Recommended Albums</h2>
+              <h2 className="text-xl font-bold mb-6">Álbumes recomendados</h2>
               {recommendedAlbums.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                   {recommendedAlbums.map((album, index) => (
@@ -485,7 +485,7 @@ export default function RecommendationsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 dark:text-gray-400">No album recommendations available</p>
+                <p className="text-center text-gray-500 dark:text-gray-400">No hay recomendaciones de álbumes disponibles</p>
               )}
             </div>
           )}

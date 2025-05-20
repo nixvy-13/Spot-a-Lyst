@@ -132,7 +132,7 @@ export default function ProfilePage() {
           </svg>
           <h2 className="text-2xl font-bold mb-4">You need to be logged in</h2>
           <p className="mb-6 text-gray-600 dark:text-gray-300">
-            Please login with your Spotify account to view your profile and stats.
+            Por favor inicia sesion con tu cuenta de Spotify para ver tu perfil y estadísticas.
           </p>
         </div>
       </div>
@@ -141,7 +141,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8">
-      {/* User Profile Header */}
+      {/* Header Perfil de Usuario */}
       {user && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {user.imageUrl && (
@@ -161,7 +161,7 @@ export default function ProfilePage() {
             )}
             <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-3">
               <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm">
-                Spotify User
+                Usuario de Spotify
               </span>
               
               <button
@@ -179,14 +179,14 @@ export default function ProfilePage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Refreshing...
+                    Recargando...
                   </>
                 ) : (
                   <>
                     <svg className="mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Refresh Stats
+                    Recargar Estadísticas
                   </>
                 )}
               </button>
@@ -195,12 +195,12 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Listening Time Chart Section */}
+      {/* Chart de tiempo de escucha */}
       {isSignedIn && (
         <ListeningTimeChart key={`refresh-${refreshKey}`} />
       )}
 
-      {/* Top Tracks Section */}
+      {/* Seccion de canciones top */}
       <StatsGrid
         title="Your Top Tracks"
         timeRangeOptions={TIME_RANGE_OPTIONS}
@@ -223,7 +223,7 @@ export default function ProfilePage() {
         ))}
       </StatsGrid>
 
-      {/* Top Artists Section */}
+      {/* Seccion de artistas top */}
       <StatsGrid
         title="Your Top Artists"
         timeRangeOptions={TIME_RANGE_OPTIONS}
@@ -243,7 +243,7 @@ export default function ProfilePage() {
         ))}
       </StatsGrid>
 
-      {/* Recently Played Section */}
+      {/* Secion de recien escuchadas */}
       <StatsGrid
         title="Recently Played"
         isLoading={isLoading.recent}
