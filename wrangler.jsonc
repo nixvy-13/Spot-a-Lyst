@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "tfg",
+	"name": "spot-a-lyst",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2025-03-01",
 	"compatibility_flags": [
@@ -21,6 +21,8 @@
 		}
 	],
 	"vars": {
-		"NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_aWRlYWwtY2F0ZmlzaC01NS5jbGVyay5hY2NvdW50cy5kZXYk"
+		"NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_aWRlYWwtY2F0ZmlzaC01NS5jbGVyay5hY2NvdW50cy5kZXYk",
+		"NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL": "=/profile"
 	}
+	
 }
