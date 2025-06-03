@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
     `;
     
     // Configure model(s) based on environment variable
-    const modelsConfig = process.env.OPENROUTER_MODELS || "openai/gpt-4o-mini:online";
+    const modelsConfig = process.env.OPENROUTER_MODELS || "openrouter/auto:online";
     let completionParams: any = {
       messages: [
         {
