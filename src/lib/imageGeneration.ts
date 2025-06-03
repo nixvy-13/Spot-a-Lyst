@@ -115,7 +115,6 @@ export async function captureComponentAsImage(
       logging: false,
       imageTimeout: 20000,
       foreignObjectRendering: false,
-      letterRendering: false,
       removeContainer: true,
       scrollX: 0,
       scrollY: 0,
@@ -227,7 +226,7 @@ export async function captureComponentAsImage(
 
   } catch (error) {
     console.error('Error capturing component as image:', error);
-    throw new Error(`Failed to generate image: ${error.message}`);
+    throw new Error(`Failed to generate image: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -268,7 +267,7 @@ export function waitForImagesToLoad(element: HTMLElement): Promise<void> {
 // Helper function to ensure fonts are loaded
 export function waitForFontsToLoad(): Promise<void> {
   if ('fonts' in document) {
-    return document.fonts.ready;
+    return document.fonts.ready.then(() => {});
   }
   
   // Fallback for browsers without FontFace API
