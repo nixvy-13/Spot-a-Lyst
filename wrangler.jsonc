@@ -21,7 +21,7 @@
 		}
 	],
 	"browser": {
-		"binding": "puppeteer"
+		"binding": "PUPPETEER"
 	},
 	"vars": {
 		"NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_aWRlYWwtY2F0ZmlzaC01NS5jbGVyay5hY2NvdW50cy5kZXYk",
