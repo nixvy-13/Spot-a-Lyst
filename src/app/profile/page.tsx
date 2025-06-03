@@ -6,7 +6,6 @@ import Image from 'next/image';
 import StatsGrid from '@/components/StatsGrid';
 import TrackCard from '@/components/TrackCard';
 import ArtistCard from '@/components/ArtistCard';
-import ListeningTimeChart from '@/components/ListeningTimeChart';
 import { spotifyApi } from '@/lib/apiClient';
 import { Artist, Track, TimeRange } from '@/types/spotify';
 
@@ -87,9 +86,6 @@ export default function ProfilePage() {
     try {
       setIsRefreshing(true);
       await spotifyApi.refreshSpotifyStats();
-      
-      // Increment refresh key to trigger ListeningTimeChart refresh
-      setRefreshKey(prev => prev + 1);
       
       // Reload all data
       await Promise.all([
@@ -276,11 +272,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Chart de tiempo de escucha */}
-      {isSignedIn && (
-        <ListeningTimeChart key={`refresh-${refreshKey}`} />
       )}
 
       {/* Seccion de canciones top */}
