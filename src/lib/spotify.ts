@@ -34,11 +34,6 @@ interface SpotifyArtist {
     uri: string;
 }
 
-interface SpotifyPlaylistTrack {
-    added_at: string;
-    track: SpotifyTrack;
-}
-
 interface SpotifyPlayHistory {
     track: SpotifyTrack;
     played_at: string;
@@ -122,49 +117,6 @@ export const getRecentlyPlayed = async (token: string, limit = 20) => {
         console.error('Error getting recently played tracks:', error);
         throw error;
     }
-};
-export const getUserPlaylists = async (token: string, limit = 20) => {
-    try {
-        const response = await fetch(
-            `https://api.spotify.com/v1/me/playlists?limit=${limit}`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            }
-        );
-        if (!response.ok) {
-            throw new Error(`Error getting user playlists: ${response.status}`);
-        }
-        const data = await response.json() as SpotifyPagingObject<any>;
-        return data.items;
-        } catch (error) {
-            console.error('Error getting user playlists:', error);
-            throw error;
-        }
-};
-
-export const getPlaylistTracks = async (token: string, playlistId: string) => {
-    try {
-        const response = await fetch(
-            `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-            {
-                headers: {
-                'Authorization': `Bearer ${token}`,
-                },
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`Error getting playlist tracks: ${response.status}`);
-        }
-
-        const data = await response.json() as SpotifyPagingObject<SpotifyPlaylistTrack>;
-        return data.items;
-        } catch (error) {
-            console.error('Error getting playlist tracks:', error);
-            throw error;
-        }
 };
 
 export const getSpotifyToken = async (userId: string): Promise<string> => {

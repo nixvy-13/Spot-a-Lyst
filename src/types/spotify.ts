@@ -31,19 +31,6 @@ export interface Artist {
 export type TimeRange = 'short_term' | 'medium_term' | 'long_term';
 
 /**
- * Playlist interface representing a Spotify playlist
- */
-export interface Playlist {
-  id: string;
-  name: string;
-  description: string | null;
-  imageUrl: string | null;
-  trackCount: number;
-  owner: string;
-  public: boolean;
-}
-
-/**
  * Listening time data point
  */
 export interface ListeningTimeData {
@@ -68,10 +55,6 @@ export interface TopArtistsResponse extends ApiResponse {
 
 export interface RecentlyPlayedResponse extends ApiResponse {
   tracks: Track[];
-}
-
-export interface PlaylistsResponse extends ApiResponse {
-  playlists: Playlist[];
 }
 
 export interface RecommendationsResponse extends ApiResponse {

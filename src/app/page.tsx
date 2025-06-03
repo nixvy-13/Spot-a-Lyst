@@ -1,7 +1,6 @@
 'use client';
 
-import { SignOutButton, SignInButton, useAuth  } from "@clerk/nextjs";
-import Image from "next/image";
+import { SignInButton, useAuth  } from "@clerk/nextjs";
 import Link from "next/link";
 
 
@@ -59,22 +58,6 @@ export default function Home() {
           <p className="text-gray-600 dark:text-gray-300">
             Obten recomendaciones de musica personalizadas basadas en tu historial de escucha.
           </p>
-        </div>
-      </div>
-      
-      <div className="relative w-full max-w-4xl h-64 sm:h-80 mt-10 rounded-lg overflow-hidden shadow-xl">
-        <Image
-          src="https://i.scdn.co/image/ab67706f00000003e8e28219724c2423afa4d320"
-          alt="Music visualization"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-          <div className="text-white">
-            <h3 className="text-2xl font-bold">¿Preparado para descubrir más?</h3>
-            <p className="mt-2">Inicia sesión con tu cuenta de Spotify para empezar</p>
-          </div>
         </div>
       </div>
     </div>

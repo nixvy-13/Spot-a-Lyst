@@ -1,11 +1,18 @@
 import { getTopArtists, getTopTracks, searchSpotifyArtists, searchSpotifyAlbums, searchSpotifyTracks, extractJsonFromMarkdown, getSpotifyToken, getRecentlyPlayed } from "@/lib/spotify";
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from 'openai';
 import { auth } from "@clerk/nextjs/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-// Initialize Google Generative AI with API key
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || "");
+// Initialize OpenAI with OpenRouter configuration
+const openai = new OpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY || "",
+  defaultHeaders: {
+    'HTTP-Referer': process.env.SITE_URL || 'https://spot-a-lyst.nixvy.ninja/',
+    'X-Title': 'Spot-a-Lyst',
+  },
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +31,7 @@ export async function GET(request: NextRequest) {
     
     // Only check cache if not forcing refresh
     if (!forceRefresh) {
-      const cachedData = await env.playlister.get(key);
+      const cachedData = await env.kv.get(key);
       
       if (cachedData) {
         // Return cached data if available
@@ -66,7 +73,6 @@ export async function GET(request: NextRequest) {
       }))
     };
     let aiInsights;
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     const prompt = `
       As a music expert AI with a witty personality, analyze this user's listening preferences:
@@ -98,10 +104,20 @@ export async function GET(request: NextRequest) {
       Just the raw JSON data, answer in spanish.
     `;
     
-    const geminiResult = await model.generateContent(prompt);
-    const geminiResponse = await geminiResult.response.text();
+    const completion = await openai.chat.completions.create({
+      model: "openrouter/auto",
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    });
+    
+    const openaiResponse = completion.choices[0].message.content || "";
+    
     try {
-      const cleanedResponse = extractJsonFromMarkdown(geminiResponse);        
+      const cleanedResponse = extractJsonFromMarkdown(openaiResponse);        
       aiInsights = JSON.parse(cleanedResponse);
       aiInsights.patterns = aiInsights.patterns || [];
       aiInsights.recommendedTracks = aiInsights.recommendedTracks || [];
@@ -109,7 +125,7 @@ export async function GET(request: NextRequest) {
       aiInsights.recommendedAlbums = aiInsights.recommendedAlbums || [];
       aiInsights.recommendedGenres = aiInsights.recommendedGenres || [];
     } catch (error) {
-      console.error("Failed to parse Gemini response:", error);
+      console.error("Failed to parse OpenAI response:", error);
       aiInsights = {
         patterns: ["Based on your listening history"],
         recommendedTracks: [],
@@ -148,7 +164,7 @@ export async function GET(request: NextRequest) {
     };
     
     // Store in KV
-    await env.playlister.put(key, JSON.stringify(results), { expirationTtl: 86400 }); // Cache for 24 hours
+    await env.kv.put(key, JSON.stringify(results), { expirationTtl: 86400 }); // Cache for 24 hours
       
     return NextResponse.json(results);
   } catch (error) {

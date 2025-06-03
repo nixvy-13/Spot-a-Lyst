@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     
     // Always get the existing data from KV store - we need to preserve it
     const kvKey = `user:${userId}:listening-time`;
-    let storedData = await env.playlister.get(kvKey, { type: "json" }) as Record<string, number> || {};
+    let storedData = await env.kv.get(kvKey, { type: "json" }) as Record<string, number> || {};
 
     // Get token for Spotify API
     const token = await getSpotifyToken(userId);
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const mergedData = mergePlaytimeData(storedData, newPlaytimeData);
     
     // Store the merged data back in KV - don't set expiration so it persists
-    await env.playlister.put(kvKey, JSON.stringify(mergedData));
+    await env.kv.put(kvKey, JSON.stringify(mergedData));
     
     // Filter the data for the requested time range
     const filteredData = filterDataByDays(mergedData, days);

@@ -30,6 +30,8 @@ export default function ProfilePage() {
     artists: false,
     recent: false,
   });
+  const [activeTab, setActiveTab] = useState<'tracks' | 'artists' | 'albums'>('tracks');
+  const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
 
   const fetchTopTracks = async (range: TimeRange) => {
     if (!isSignedIn) return;
@@ -107,6 +109,60 @@ export default function ProfilePage() {
     }
   };
 
+  const generateProfileImage = async () => {
+    if (isGeneratingImage || !user) return;
+    
+    try {
+      setIsGeneratingImage(true);
+      
+      // Preparar los datos para enviar al backend
+      const imageData = {
+        userInfo: {
+          name: user.fullName || user.firstName || 'Usuario',
+          imageUrl: user.imageUrl || undefined
+        },
+        topTracks: topTracks.slice(0, 5).map(track => ({
+          name: track.name,
+          artist: track.artist,
+          imageUrl: track.imageUrl || undefined,
+          popularity: track.popularity || 0
+        })),
+        topArtists: topArtists.slice(0, 5).map(artist => ({
+          name: artist.name,
+          genres: artist.genres,
+          imageUrl: artist.imageUrl || undefined,
+          popularity: artist.popularity || 0
+        })),
+        recentTracks: recentlyPlayed.slice(0, 5).map(track => ({
+          name: track.name,
+          artist: track.artist,
+          imageUrl: track.imageUrl || undefined,
+          playedAt: track.playedAt
+        })),
+        timeRange
+      };
+      
+      // Generar la imagen usando el endpoint del backend
+      const imageBlob = await spotifyApi.generateProfileImage(imageData);
+      
+      // Crear URL de descarga
+      const url = URL.createObjectURL(imageBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'mi-perfil-spotify.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Error generando imagen del perfil:', error);
+      alert('Error al generar la imagen del perfil. Por favor intenta de nuevo.');
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
   useEffect(() => {
     if (isSignedIn) {
       fetchTopTracks(timeRange);
@@ -156,13 +212,40 @@ export default function ProfilePage() {
           )}
           <div className="text-center sm:text-left">
             <h1 className="text-3xl font-bold">{user.fullName}</h1>
-            {user.primaryEmailAddress && (
-              <p className="text-gray-600 dark:text-gray-300">{user.primaryEmailAddress.emailAddress}</p>
-            )}
             <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-3">
               <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm">
                 Usuario de Spotify
               </span>
+              
+              {/* Botón para generar imagen del perfil */}
+              {topTracks.length > 0 && topArtists.length > 0 && recentlyPlayed.length > 0 && (
+                <button
+                  onClick={generateProfileImage}
+                  disabled={isGeneratingImage}
+                  className={`flex items-center px-3 py-1 rounded-full text-sm transition-colors ${
+                    isGeneratingImage
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                      : 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800/50'
+                  }`}
+                >
+                  {isGeneratingImage ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Generando...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="mr-1 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                      </svg>
+                      Generar imagen para compartir en RRSS
+                    </>
+                  )}
+                </button>
+              )}
               
               <button
                 onClick={handleRefreshStats}

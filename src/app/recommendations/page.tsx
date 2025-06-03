@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useAuth, useUser} from '@clerk/nextjs';
+import { spotifyApi } from '@/lib/apiClient';
 
 interface RecommendedTrack {
   name: string;
@@ -79,6 +80,7 @@ export default function RecommendationsPage() {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'tracks' | 'artists' | 'albums'>('tracks');
+  const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -97,14 +99,7 @@ export default function RecommendationsPage() {
       }
       setError(null);
       
-      const url = regenerate 
-        ? '/api/spotify/recommendations?force=true'
-        : '/api/spotify/recommendations';
-        
-      const response = await fetch(url);
-      const data = await response.json() as ApiResponse;
-      
-      if (data.error) throw new Error(data.error);
+      const data = await spotifyApi.getAIRecommendations(regenerate);
       
       setPatterns(data.patterns || []);
       setRecommendedArtists(data.recommendedArtists || []);
@@ -130,6 +125,45 @@ export default function RecommendationsPage() {
     fetchRecommendations(true);
   };
 
+  const generateShareImage = async () => {
+    if (isGeneratingImage) return;
+    
+    try {
+      setIsGeneratingImage(true);
+      
+      // Preparar los datos para enviar al backend
+      const imageData = {
+        patterns,
+        roast,
+        personalityReading,
+        recommendedGenres,
+        userTaste,
+        userInfo: {
+          name: user?.fullName || user?.firstName || 'Usuario',
+          imageUrl: user?.imageUrl || undefined
+        }
+      };
+      
+      // Generar la imagen usando el endpoint del backend
+      const imageBlob = await spotifyApi.generateShareImage(imageData);
+      
+      // Crear URL de descarga
+      const url = URL.createObjectURL(imageBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'mi-analisis-musical.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Error generando imagen:', error);
+      alert('Error al generar la imagen. Por favor intenta de nuevo.');
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
@@ -164,32 +198,63 @@ export default function RecommendationsPage() {
               Descubre nueva musica basada en tus hábitos de escucha. La IA analizara tus canciones y artistas mas escuchados para recomendarte música afín a tus gustos.
             </p>
           </div>
-          <button
-            onClick={refreshRecommendations}
-            disabled={isRefreshing}
-            className={`mt-4 sm:mt-0 px-4 py-2 rounded-md flex items-center transition-colors ${
-              isRefreshing
-                ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                : 'bg-green-500 text-white hover:bg-green-600'
-            }`}
-          >
-            {isRefreshing ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Recargando...
-              </>
-            ) : (
-              <>
-                <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
-                </svg>
-                Recargar Recomendaciones
-              </>
+          <div className="flex gap-3 mt-4 sm:mt-0">
+            {/* Botón para generar imagen */}
+            {(roast || personalityReading) && (
+              <button
+                onClick={generateShareImage}
+                disabled={isGeneratingImage}
+                className={`px-4 py-2 rounded-md flex items-center transition-colors ${
+                  isGeneratingImage
+                    ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >
+                {isGeneratingImage ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                    </svg>
+                    Generar imagen para compartir en RRSS
+                  </>
+                )}
+              </button>
             )}
-          </button>
+            <button
+              onClick={refreshRecommendations}
+              disabled={isRefreshing}
+              className={`px-4 py-2 rounded-md flex items-center transition-colors ${
+                isRefreshing
+                  ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                  : 'bg-green-500 text-white hover:bg-green-600'
+              }`}
+            >
+              {isRefreshing ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Recargando...
+                </>
+              ) : (
+                <>
+                  <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                  </svg>
+                  Recargar Recomendaciones
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {error && (

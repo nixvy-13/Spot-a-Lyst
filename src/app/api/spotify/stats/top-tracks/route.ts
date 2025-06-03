@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     
     // Only check cache if not forcing refresh
     if (!forceRefresh) {
-      const cachedData = await env.playlister.get(key);
+      const cachedData = await env.kv.get(key);
       
       if (cachedData) {
         // Return cached data if available
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     }));
     
     // Store in KV
-    await env.playlister.put(key, JSON.stringify(tracks), { expirationTtl: 3600 }); // Cache for 1 hour
+    await env.kv.put(key, JSON.stringify(tracks), { expirationTtl: 3600 }); // Cache for 1 hour
     
     return NextResponse.json({ tracks });
   } catch (error) {
