@@ -6,7 +6,9 @@ import Image from 'next/image';
 import StatsGrid from '@/components/StatsGrid';
 import TrackCard from '@/components/TrackCard';
 import ArtistCard from '@/components/ArtistCard';
+import ProfileImageCard from '@/components/ProfileImageCard';
 import { spotifyApi } from '@/lib/apiClient';
+import { captureComponentAsImage, waitForImagesToLoad, waitForFontsToLoad } from '@/lib/imageGeneration';
 import { Artist, Track, TimeRange } from '@/types/spotify';
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
@@ -31,6 +33,7 @@ export default function ProfilePage() {
   });
   const [activeTab, setActiveTab] = useState<'tracks' | 'artists' | 'albums'>('tracks');
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
+  const [showImageCard, setShowImageCard] = useState<boolean>(false);
 
   const fetchTopTracks = async (range: TimeRange) => {
     if (!isSignedIn) return;
@@ -110,53 +113,62 @@ export default function ProfilePage() {
     
     try {
       setIsGeneratingImage(true);
+      setShowImageCard(true);
       
-      // Preparar los datos para enviar al backend
-      const imageData = {
-        userInfo: {
-          name: user.fullName || user.firstName || 'Usuario',
-          imageUrl: user.imageUrl || undefined
-        },
-        topTracks: topTracks.slice(0, 5).map(track => ({
-          name: track.name,
-          artist: track.artist,
-          imageUrl: track.imageUrl || undefined,
-          popularity: track.popularity || 0
-        })),
-        topArtists: topArtists.slice(0, 5).map(artist => ({
-          name: artist.name,
-          genres: artist.genres,
-          imageUrl: artist.imageUrl || undefined,
-          popularity: artist.popularity || 0
-        })),
-        recentTracks: recentlyPlayed.slice(0, 5).map(track => ({
-          name: track.name,
-          artist: track.artist,
-          imageUrl: track.imageUrl || undefined,
-          playedAt: track.playedAt
-        })),
-        timeRange
-      };
+      // Wait for the component to render
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Generar la imagen usando el endpoint del backend
-      const imageBlob = await spotifyApi.generateProfileImage(imageData);
+      // Wait for fonts and images to load
+      await waitForFontsToLoad();
+      const element = document.getElementById('profile-image-card-capture');
+      if (element) {
+        await waitForImagesToLoad(element);
+        // Additional wait to ensure everything is properly rendered
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
       
-      // Crear URL de descarga
-      const url = URL.createObjectURL(imageBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'mi-perfil-spotify.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Capture the image
+      await captureComponentAsImage(
+        'profile-image-card-capture',
+        'mi-perfil-spotify.png',
+        1600,
+        2000
+      );
       
     } catch (error) {
       console.error('Error generando imagen del perfil:', error);
       alert('Error al generar la imagen del perfil. Por favor intenta de nuevo.');
     } finally {
       setIsGeneratingImage(false);
+      setShowImageCard(false);
     }
+  };
+
+  // Prepare data for the image card
+  const imageCardData = {
+    userInfo: {
+      name: user?.fullName || user?.firstName || 'Usuario',
+      imageUrl: user?.imageUrl || undefined
+    },
+    topTracks: topTracks.slice(0, 5).map(track => ({
+      name: track.name,
+      artist: track.artist,
+      imageUrl: track.imageUrl || undefined,
+      popularity: track.popularity || 0
+    })),
+    topArtists: topArtists.slice(0, 5).map(artist => ({
+      name: artist.name,
+      genres: artist.genres,
+      imageUrl: artist.imageUrl || undefined,
+      popularity: artist.popularity || 0
+    })),
+    recentTracks: recentlyPlayed.slice(0, 5).map(track => ({
+      name: track.name,
+      artist: track.artist,
+      imageUrl: track.imageUrl || undefined,
+      playedAt: track.playedAt
+    })),
+    timeRange
   };
 
   useEffect(() => {
@@ -193,6 +205,24 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8">
+      {/* Hidden Image Card for Capture */}
+      {showImageCard && (
+        <div 
+          id="profile-image-card-capture"
+          style={{
+            position: 'fixed',
+            top: '-100vh',
+            left: '0',
+            zIndex: -1,
+            pointerEvents: 'none',
+            opacity: 0,
+            visibility: 'hidden'
+          }}
+        >
+          <ProfileImageCard data={imageCardData} />
+        </div>
+      )}
+
       {/* Header Perfil de Usuario */}
       {user && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">

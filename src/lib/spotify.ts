@@ -326,6 +326,65 @@ export async function searchSpotifyTracks(accessToken: string, trackNames: {name
 }
 
 /**
+ * Search for track details on Spotify by title only
+ */
+export async function searchSpotifyTracksByTitle(accessToken: string, trackTitles: string[]) {
+  const trackDetails = [];
+  
+  for (const title of trackTitles) {
+    try {
+      const response = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(title)}&type=track&limit=5`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          next: { tags: ['spotifyTracks'] }
+        }
+      );
+      
+      const data = await response.json() as SpotifySearchResponse<{
+        name: string;
+        id: string;
+        artists: { name: string }[];
+        album: { name: string; images?: { url: string }[] };
+        popularity: number;
+        duration_ms: number;
+        preview_url: string | null;
+        external_urls: { spotify: string };
+      }>;
+      
+      if (data.tracks && data.tracks.items.length > 0) {
+        // Find the most popular track among the results
+        const mostPopularTrack = data.tracks.items.reduce((prev, current) => 
+          (prev.popularity > current.popularity) ? prev : current
+        );
+        
+        trackDetails.push({
+          name: mostPopularTrack.name,
+          id: mostPopularTrack.id,
+          artist: mostPopularTrack.artists.map((a) => a.name).join(', '),
+          album: mostPopularTrack.album.name,
+          popularity: mostPopularTrack.popularity,
+          duration: mostPopularTrack.duration_ms,
+          previewUrl: mostPopularTrack.preview_url,
+          spotifyUrl: mostPopularTrack.external_urls.spotify,
+          imageUrl: mostPopularTrack.album.images?.[0]?.url || null
+        });
+      } else {
+        // Track not found, return only the title
+        trackDetails.push({ name: title, notFound: true });
+      }
+    } catch (error) {
+      console.error(`Error searching for track ${title}:`, error);
+      trackDetails.push({ name: title, error: true });
+    }
+  }
+  
+  return trackDetails;
+}
+
+/**
  * Extract JSON data from a Markdown response
  */
 export function extractJsonFromMarkdown(text: string): string {

@@ -139,35 +139,6 @@ export const spotifyApi = {
   },
 
   /**
-   * Generate share image from recommendations data
-   */
-  generateShareImage: async (data: {
-    patterns: string[];
-    roast: string;
-    personalityReading: string;
-    recommendedGenres: string[];
-    userTaste: any;
-    userInfo: {
-      name: string;
-      imageUrl?: string;
-    };
-  }): Promise<Blob> => {
-    const response = await fetch('/api/spotify/generate-recomendations-image', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to generate image');
-    }
-    
-    return response.blob();
-  },
-
-  /**
    * Get listening time data for the user
    */
   getListeningTimeForUser: async (): Promise<ListeningTimeData[]> => {
@@ -179,49 +150,5 @@ export const spotifyApi = {
     }
     
     return data.listeningTime;
-  },
-
-  /**
-   * Generate profile image from user stats
-   */
-  generateProfileImage: async (data: {
-    userInfo: {
-      name: string;
-      email?: string;
-      imageUrl?: string;
-    };
-    topTracks: Array<{
-      name: string;
-      artist: string;
-      imageUrl?: string;
-      popularity: number;
-    }>;
-    topArtists: Array<{
-      name: string;
-      genres: string[];
-      imageUrl?: string;
-      popularity: number;
-    }>;
-    recentTracks: Array<{
-      name: string;
-      artist: string;
-      imageUrl?: string;
-      playedAt?: string;
-    }>;
-    timeRange: 'short_term' | 'medium_term' | 'long_term';
-  }): Promise<Blob> => {
-    const response = await fetch('/api/spotify/generate-profile-image', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to generate profile image');
-    }
-    
-    return response.blob();
-  },
+  }
 }; 

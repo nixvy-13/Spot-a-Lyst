@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useAuth, useUser} from '@clerk/nextjs';
 import { spotifyApi } from '@/lib/apiClient';
+import RecommendationsImageCard from '@/components/RecommendationsImageCard';
+import { captureComponentAsImage, waitForImagesToLoad, waitForFontsToLoad } from '@/lib/imageGeneration';
 
 interface RecommendedTrack {
   name: string;
@@ -81,6 +83,7 @@ export default function RecommendationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'tracks' | 'artists' | 'albums'>('tracks');
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
+  const [showImageCard, setShowImageCard] = useState<boolean>(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -130,40 +133,50 @@ export default function RecommendationsPage() {
     
     try {
       setIsGeneratingImage(true);
+      setShowImageCard(true);
       
-      // Preparar los datos para enviar al backend
-      const imageData = {
-        patterns,
-        roast,
-        personalityReading,
-        recommendedGenres,
-        userTaste,
-        userInfo: {
-          name: user?.fullName || user?.firstName || 'Usuario',
-          imageUrl: user?.imageUrl || undefined
-        }
-      };
+      // Wait for the component to render
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Generar la imagen usando el endpoint del backend
-      const imageBlob = await spotifyApi.generateShareImage(imageData);
+      // Wait for fonts and images to load
+      await waitForFontsToLoad();
+      const element = document.getElementById('recommendations-image-card-capture');
+      if (element) {
+        await waitForImagesToLoad(element);
+        // Additional wait to ensure everything is properly rendered
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
       
-      // Crear URL de descarga
-      const url = URL.createObjectURL(imageBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'mi-analisis-musical.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Capture the image
+      await captureComponentAsImage(
+        'recommendations-image-card-capture',
+        'mi-analisis-musical.png',
+        1600,
+        2000
+      );
       
     } catch (error) {
       console.error('Error generando imagen:', error);
       alert('Error al generar la imagen. Por favor intenta de nuevo.');
     } finally {
       setIsGeneratingImage(false);
+      setShowImageCard(false);
     }
   };
+
+  // Prepare data for the image card
+  const imageCardData = {
+    patterns,
+    roast,
+    personalityReading,
+    recommendedGenres,
+    userTaste: userTaste || { stats: { avgPopularity: 0, avgEnergy: 0, explicitRatio: 0 } },
+    userInfo: {
+      name: user?.fullName || user?.firstName || 'Usuario',
+      imageUrl: user?.imageUrl || undefined
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
@@ -190,6 +203,24 @@ export default function RecommendationsPage() {
 
   return (
     <div className="space-y-8">
+      {/* Hidden Image Card for Capture */}
+      {showImageCard && (
+        <div 
+          id="recommendations-image-card-capture"
+          style={{
+            position: 'fixed',
+            top: '-100vh',
+            left: '0',
+            zIndex: -1,
+            pointerEvents: 'none',
+            opacity: 0,
+            visibility: 'hidden'
+          }}
+        >
+          <RecommendationsImageCard data={imageCardData} />
+        </div>
+      )}
+
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div>

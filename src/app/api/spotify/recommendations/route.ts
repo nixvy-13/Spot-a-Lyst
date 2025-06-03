@@ -1,4 +1,4 @@
-import { getTopArtists, getTopTracks, searchSpotifyArtists, searchSpotifyAlbums, searchSpotifyTracks, extractJsonFromMarkdown, getSpotifyToken, getRecentlyPlayed } from "@/lib/spotify";
+import { getTopArtists, getTopTracks, searchSpotifyArtists, searchSpotifyAlbums, searchSpotifyTracks, searchSpotifyTracksByTitle, extractJsonFromMarkdown, getSpotifyToken, getRecentlyPlayed } from "@/lib/spotify";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from 'openai';
 import { auth } from "@clerk/nextjs/server";
@@ -41,11 +41,13 @@ export async function GET(request: NextRequest) {
     
     // If no cached data or force refresh, generate new recommendations
     const token = await getSpotifyToken(userId);
-    const [topTracks, topArtists, topArtistsLongTerm, topTracksLongTerm, recentlyPlayed]	 = await Promise.all([
+    const [topTracks, topArtists, topArtistsLongTerm, topTracksLongTerm, topTracksShortTerm, topArtistsShortTerm, recentlyPlayed] = await Promise.all([
       getTopTracks(token, "medium_term", 10),
       getTopArtists(token, "medium_term", 10),
       getTopArtists(token, "long_term", 10),
       getTopTracks(token, "long_term", 10),
+      getTopTracks(token, "short_term", 10),
+      getTopArtists(token, "short_term", 10),
       getRecentlyPlayed(token, 50)
     ]);
 
@@ -70,29 +72,80 @@ export async function GET(request: NextRequest) {
         danceability: track.danceability,
         energy: track.energy,
         valence: track.valence
+      })),
+      topArtistsLongTerm: topArtistsLongTerm.slice(0, 10).map((artist: any) => ({
+        name: artist.name,
+        genres: artist.genres,
+        popularity: artist.popularity,
+        followers: artist.followers?.total || 0
+      })),
+      topTracksLongTerm: topTracksLongTerm.slice(0, 10).map((track: any) => ({
+        name: track.name,
+        artist: track.artists.map((a: any) => a.name).join(", "),
+        popularity: track.popularity,
+        duration: track.duration_ms,
+        explicit: track.explicit,
+        danceability: track.danceability,
+        energy: track.energy,
+        valence: track.valence
+      })),
+      topArtistsShortTerm: topArtistsShortTerm.slice(0, 10).map((artist: any) => ({
+        name: artist.name,
+        genres: artist.genres,
+        popularity: artist.popularity,
+        followers: artist.followers?.total || 0
+      })),
+      topTracksShortTerm: topTracksShortTerm.slice(0, 10).map((track: any) => ({
+        name: track.name,
+        artist: track.artists.map((a: any) => a.name).join(", "),
+        popularity: track.popularity,
+        duration: track.duration_ms,
+        explicit: track.explicit,
+        danceability: track.danceability,
+        energy: track.energy,
+        valence: track.valence
+      })),
+      recentlyPlayed: recentlyPlayed.slice(0, 20).map((item: any) => ({
+        name: item.track.name,
+        artist: item.track.artists.map((a: any) => a.name).join(", "),
+        playedAt: item.played_at,
+        popularity: item.track.popularity,
+        explicit: item.track.explicit
       }))
     };
     let aiInsights;
     
     const prompt = `
-      As a music expert AI with a witty personality, analyze this user's listening preferences:
+      As a music expert AI with a witty personality, analyze this user's comprehensive listening preferences:
       
-      Top Artists: ${JSON.stringify(userTasteInfo.topArtists)}
-      Top Tracks: ${JSON.stringify(userTasteInfo.topTracks)}
+      Top Artists (Medium Term - Last 6 months): ${JSON.stringify(userTasteInfo.topArtists)}
+      Top Tracks (Medium Term - Last 6 months): ${JSON.stringify(userTasteInfo.topTracks)}
       
-      Based on this data:
-      1. What musical patterns do you notice in their taste?
-      2. Recommend 5 specific tracks they might enjoy
+      Top Artists (Long Term - Several years): ${JSON.stringify(userTasteInfo.topArtistsLongTerm)}
+      Top Tracks (Long Term - Several years): ${JSON.stringify(userTasteInfo.topTracksLongTerm)}
+      
+      Top Artists (Short Term - Last 4 weeks): ${JSON.stringify(userTasteInfo.topArtistsShortTerm)}
+      Top Tracks (Short Term - Last 4 weeks): ${JSON.stringify(userTasteInfo.topTracksShortTerm)}
+      
+      Recently Played: ${JSON.stringify(userTasteInfo.recentlyPlayed)}
+      
+      Based on this comprehensive data across different time periods:
+      1. What musical patterns do you notice in their taste? Consider their evolution over time
+      2. Recommend 5 specific track titles they might enjoy (ONLY the song titles, no artists)
       3. Recommend 5 specific artists they might enjoy that aren't in their top artists
       4. Recommend 5 specific albums they might enjoy
       5. Suggest 3-5 genres they might like to explore
-      6. Write a short, witty roast of their music taste (be playful but not mean)
+      6. Write a short, witty roast of their music taste (be playful and mean, hurt their feelings as much as possible)
       7. Write a horoscope-style personality reading based on their music choices
       
+      Don't repeat the same artist or track in the recommendations.
+      Don't recommend the user song of artist or album he already has in his top tracks or top artists.
+      For the track recommendations, provide ONLY the song titles - we will search for the correct artists using Spotify API.
+
       Return your response as a clean JSON object with these fields only:
       {
         "patterns": ["pattern1", "pattern2", ...],
-        "recommendedTracks": [{"name": "track name", "artist": "artist name"}, ...],
+        "recommendedTracks": ["track title 1", "track title 2", ...],
         "recommendedArtists": ["artist1", "artist2", ...],
         "recommendedAlbums": ["album1", "album2", ...],
         "recommendedGenres": ["genre1", "genre2", ...],
@@ -100,22 +153,40 @@ export async function GET(request: NextRequest) {
         "personalityReading": "horoscope-style reading"
       }
       
-      IMPORTANT: Return ONLY the JSON with no explanations, no backticks, and no markdown formatting.
-      Just the raw JSON data, answer in spanish.
+      IMPORTANT: Return ONLY the JSON with no explanations, no backticks, and no markdown formatting. Just the raw JSON data.
+      VERY IMPORTANT: DO NOT REPEAT ARTIST, SONGS OR ALBUMS IN THE RECOMMENDATIONS. AND UNDER NO CIRCUMSTANCES RECOMMEND THE USER AN ALBUM, SONG OR ARTIST THAT HE ALREADY HAS IN HIS TOP TRACKS OR TOP ARTISTS.
+      LANGUAGE: Answer in Spanish.
     `;
     
-    const completion = await openai.chat.completions.create({
-      model: "openrouter/auto",
+    // Configure model(s) based on environment variable
+    const modelsConfig = process.env.OPENROUTER_MODELS || "openai/gpt-4o-mini:online";
+    let completionParams: any = {
       messages: [
         {
           role: 'user',
           content: prompt,
         },
       ],
-    });
+    };
+    
+    try {
+      // Try to parse as JSON array first
+      const parsedModels = JSON.parse(modelsConfig);
+      if (Array.isArray(parsedModels) && parsedModels.length > 0) {
+        // Use first model as primary and set models array for fallback
+        completionParams.model = parsedModels[0];
+        completionParams.models = parsedModels;
+      } else {
+        completionParams.model = String(parsedModels);
+      }
+    } catch {
+      // If parsing fails, treat as single model string
+      completionParams.model = modelsConfig;
+    }
+    
+    const completion = await openai.chat.completions.create(completionParams);
     
     const openaiResponse = completion.choices[0].message.content || "";
-    
     try {
       const cleanedResponse = extractJsonFromMarkdown(openaiResponse);        
       aiInsights = JSON.parse(cleanedResponse);
@@ -140,7 +211,7 @@ export async function GET(request: NextRequest) {
     const [enrichedArtists, enrichedAlbums, enrichedTracks] = await Promise.all([
       searchSpotifyArtists(token, aiInsights.recommendedArtists),
       searchSpotifyAlbums(token, aiInsights.recommendedAlbums),
-      searchSpotifyTracks(token, aiInsights.recommendedTracks)
+      searchSpotifyTracksByTitle(token, aiInsights.recommendedTracks)
     ]);
     
     const results = {
