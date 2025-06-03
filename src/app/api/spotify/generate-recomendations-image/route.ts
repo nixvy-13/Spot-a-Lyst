@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     
     // Launch puppeteer browser using Cloudflare's API
     const browser = await puppeteer.launch(env.PUPPETEER, {
-      keep_alive: 6000 // Keep browser alive for 1 minute
+      keep_alive: 10000 // Keep browser alive for 1 minute
     });
 
     const page = await browser.newPage();
