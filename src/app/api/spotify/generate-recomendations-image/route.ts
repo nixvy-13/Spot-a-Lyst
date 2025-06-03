@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import puppeteer from 'puppeteer';
+import puppeteer from "@cloudflare/puppeteer";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,10 +33,12 @@ export async function POST(request: NextRequest) {
       userInfo: data.userInfo
     });
 
-    // Launch puppeteer browser
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    // Get Cloudflare context and browser binding
+    const { env } = getCloudflareContext();
+    
+    // Launch puppeteer browser using Cloudflare's API
+    const browser = await puppeteer.launch(env.PUPPETEER, {
+      keep_alive: 6000 // Keep browser alive for 1 minute
     });
 
     const page = await browser.newPage();

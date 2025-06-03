@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import puppeteer from 'puppeteer';
+import puppeteer from "@cloudflare/puppeteer";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 interface ProfileImageData {
   userInfo: {
     name: string;
+    email?: string;
     imageUrl?: string;
   };
   topTracks: Array<{
@@ -41,10 +43,12 @@ export async function POST(request: NextRequest) {
     // Generate HTML content for the image
     const htmlContent = generateProfileCardHTML(data);
 
-    // Launch puppeteer browser
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    // Get Cloudflare context and browser binding
+    const { env } = getCloudflareContext();
+    
+    // Launch puppeteer browser using Cloudflare's API
+    const browser = await puppeteer.launch(env.PUPPETEER, {
+      keep_alive: 6000 // Keep browser alive for 1 minute
     });
 
     const page = await browser.newPage();
@@ -306,6 +310,7 @@ function generateProfileCardHTML(data: ProfileImageData) {
           ${userInfo?.imageUrl ? `<img src="${userInfo.imageUrl}" alt="User" class="avatar">` : ''}
           <div class="user-details">
             <h1>🎵 ${userInfo?.name || 'Mi Perfil de Spotify'}</h1>
+            ${userInfo?.email ? `<p>${userInfo.email}</p>` : ''}
           </div>
         </div>
         <div class="time-range">${timeRangeLabels[timeRange]}</div>

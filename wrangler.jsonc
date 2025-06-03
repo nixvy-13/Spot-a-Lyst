@@ -20,6 +20,9 @@
 			"id": "ed4494715eff436c8839b4181fb6cb46"
 		}
 	],
+	"browser": {
+		"binding": "puppeteer"
+	},
 	"vars": {
 		"NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_aWRlYWwtY2F0ZmlzaC01NS5jbGVyay5hY2NvdW50cy5kZXYk",
 		"NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL": "=/profile"

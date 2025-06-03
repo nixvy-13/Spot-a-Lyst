@@ -6,6 +6,7 @@ declare namespace Cloudflare {
 		kv: KVNamespace;
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_aWRlYWwtY2F0ZmlzaC01NS5jbGVyay5hY2NvdW50cy5kZXYk";
 		ASSETS: Fetcher;
+        PUPPETEER: Fetcher;
 	}
 }
 interface CloudflareEnv extends Cloudflare.Env {}
