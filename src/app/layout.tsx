@@ -36,7 +36,7 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="w-full py-6 text-center text-sm text-gray-500">
-              <p>© {new Date().getFullYear()} Estadísticas de Spotify</p>
+              <p>© {new Date().getFullYear()} Spot-A-Lyst</p>
             </footer>
           </div>
         </Providers>
