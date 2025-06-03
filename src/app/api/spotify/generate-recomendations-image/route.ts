@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
         imageUrl?: string;
       };
     };
+
+    console.log('Received data:', data);
     
     // Generate HTML content for the image
     const htmlContent = generateShareCardHTML({

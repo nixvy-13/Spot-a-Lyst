@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Get data from request body
     const data = await request.json() as ProfileImageData;
+    console.log('Received data:', data);
 
     // Generate HTML content for the image
     const htmlContent = generateProfileCardHTML(data);
