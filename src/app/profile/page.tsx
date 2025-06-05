@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth, useUser } from '@clerk/nextjs';
+import { SignInButton, useAuth, useUser } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import StatsGrid from '@/components/StatsGrid';
@@ -198,6 +198,9 @@ export default function ProfilePage() {
           <p className="mb-6 text-gray-600 dark:text-gray-300">
             Por favor inicia sesion con tu cuenta de Spotify para ver tu perfil y estadísticas.
           </p>
+          <SignInButton>
+            Inciar Sesión
+          </SignInButton>
         </div>
       </div>
     );

@@ -2,6 +2,7 @@
 
 import { SignInButton, useAuth  } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 
 
 export default function Home() {
@@ -10,6 +11,13 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center space-y-10 py-10">
       <div className="text-center max-w-3xl mx-auto">
+        <Image
+          src="/logo.png" 
+          alt="Spot-A-Lyst Logo"
+          width={150}
+          height={150}
+          className="mx-auto mb-6"
+        />
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900 dark:text-white">
           Tu Spotify, <span className="text-green-500">Reimaginado</span>
         </h1>

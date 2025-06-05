@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useAuth, useUser} from '@clerk/nextjs';
+import { SignInButton, useAuth, useUser} from '@clerk/nextjs';
 import { spotifyApi } from '@/lib/apiClient';
 import RecommendationsImageCard from '@/components/RecommendationsImageCard';
 import { captureComponentAsImage, waitForImagesToLoad, waitForFontsToLoad } from '@/lib/imageGeneration';
@@ -196,6 +196,9 @@ export default function RecommendationsPage() {
           <p className="mb-6 text-gray-600 dark:text-gray-300">
             Por favor inicia sesion con tu cuenta de Spotify para ver recomendaciones de musica personalizadas.
           </p>
+          <SignInButton>
+            Inicia sesion
+          </SignInButton>
         </div>
       </div>
     );
