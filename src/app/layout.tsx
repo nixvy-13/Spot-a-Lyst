@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Spotify Stats & Converter",
+  title: "Spot-a-Lyst",
   description: "View your Spotify stats and get AI recommendations",
 };
 
