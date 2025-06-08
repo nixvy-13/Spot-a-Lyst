@@ -135,7 +135,7 @@ const RecommendationsImageCard: React.FC<RecommendationsImageCardProps> = ({ dat
               marginBottom: '12px',
               color: '#a78bfa'
             }}>
-              🤖 Google Gemini Insights:
+              🤖 Insights de la IA:
             </h2>
             <ul style={{
               fontSize: '22px',

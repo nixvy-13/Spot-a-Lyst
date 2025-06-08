@@ -331,7 +331,7 @@ export default function RecommendationsPage() {
               <svg className="h-6 w-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 16h2v-2h-2v2zm1.61-9.96c-.36-.74-1.1-1.25-1.96-1.25-1.2 0-2.18.95-2.2 2.14h1.76c0-.39.33-.7.72-.7.4 0 .72.31.72.7 0 .39-.32.7-.72.7-.16 0-.28.11-.28.25V12h1.76v-1.61c.75-.25 1.3-.97 1.3-1.81 0-.54-.23-1.04-.6-1.39-.1-.1-.22-.19-.35-.27-.06-.04-.13-.09-.2-.12-.05-.04-.12-.06-.19-.1z" />
               </svg>
-              Google Gemini Insights
+              Insights de la IA
             </h2>
             
             <div className="space-y-6">
@@ -346,7 +346,7 @@ export default function RecommendationsPage() {
               
               {recommendedGenres.length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-lg mb-2 text-purple-700 dark:text-purple-400">Genres to Explore</h3>
+                  <h3 className="font-semibold text-lg mb-2 text-purple-700 dark:text-purple-400">Generos a Explorar</h3>
                   <div className="flex flex-wrap gap-2">
                     {recommendedGenres.map((genre, index) => (
                       <span key={index} className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm">
